@@ -1,0 +1,37 @@
+#!/usr/bin/env php
+<?php
+spl_autoload_register(
+  function ($class)
+  {
+      static $classes = NULL;
+
+      if ($classes === NULL) {
+          $classes = array(
+            ___CLASSLIST___
+          );
+      }
+
+      $class = strtolower($class);
+
+      if (isset($classes[$class])) {
+          require 'phar://phpdox.phar/' . $classes[$class];
+      }
+  }
+);
+
+Phar::mapPhar('phpdox.phar');
+define('PHPDOX_PHAR', 'phpdox.phar');
+
+require 'phar://phpdox.phar/phpdox/runtimecheck.php';
+
+$factory = new TheSeer\phpDox\Factory(
+    new \TheSeer\phpDox\FileInfo('phar://' . PHPDOX_PHAR),
+    new \TheSeer\phpDox\Version('___VERSION___')
+);
+$factory->getCLI()->run(
+    new TheSeer\phpDox\CLIOptions($_SERVER['argv'])
+);
+
+exit(0);
+
+__HALT_COMPILER();
